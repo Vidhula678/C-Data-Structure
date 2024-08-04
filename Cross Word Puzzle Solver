@@ -1,0 +1,117 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX 100
+
+void printGrid(char grid[MAX][MAX], int n) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            printf("%c ", grid[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+int isSafe(char grid[MAX][MAX], int row, int col, char word[], int n, int dir) {
+    int len = strlen(word);
+    if (dir == 0) { // Horizontal
+        if (col + len > n) return 0;
+        for (int i = 0; i < len; i++) {
+            if (grid[row][col + i] != '-' && grid[row][col + i] != word[i]) return 0;
+        }
+    } else { // Vertical
+        if (row + len > n) return 0;
+        for (int i = 0; i < len; i++) {
+            if (grid[row + i][col] != '-' && grid[row + i][col] != word[i]) return 0;
+        }
+    }
+    return 1;
+}
+
+void placeWord(char grid[MAX][MAX], int row, int col, char word[], int dir) {
+    int len = strlen(word);
+    if (dir == 0) { // Horizontal
+        for (int i = 0; i < len; i++) {
+            grid[row][col + i] = word[i];
+        }
+    } else { // Vertical
+        for (int i = 0; i < len; i++) {
+            grid[row + i][col] = word[i];
+        }
+    }
+}
+
+void removeWord(char grid[MAX][MAX], int row, int col, char word[], int dir) {
+    int len = strlen(word);
+    if (dir == 0) { // Horizontal
+        for (int i = 0; i < len; i++) {
+            grid[row][col + i] = '-';
+        }
+    } else { // Vertical
+        for (int i = 0; i < len; i++) {
+            grid[row + i][col] = '-';
+        }
+    }
+}
+
+int solveCrossword(char grid[MAX][MAX], char words[MAX][MAX], int index, int n, int wordCount) {
+    if (index == wordCount) return 1;
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (grid[i][j] == '-' || grid[i][j] == words[index][0]) {
+                if (isSafe(grid, i, j, words[index], n, 0)) {
+                    placeWord(grid, i, j, words[index], 0);
+                    if (solveCrossword(grid, words, index + 1, n, wordCount)) return 1;
+                    removeWord(grid, i, j, words[index], 0);
+                }
+                if (isSafe(grid, i, j, words[index], n, 1)) {
+                    placeWord(grid, i, j, words[index], 1);
+                    if (solveCrossword(grid, words, index + 1, n, wordCount)) return 1;
+                    removeWord(grid, i, j, words[index], 1);
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+int main() {
+    int n, wordCount;
+    char grid[MAX][MAX];
+    char words[MAX][MAX];
+
+    printf("Enter the size of the grid: ");
+    scanf("%d", &n);
+
+    // Initialize the grid with '-'
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            grid[i][j] = '-';
+        }
+    }
+
+    printf("Enter the number of words: ");
+    scanf("%d", &wordCount);
+
+    printf("Enter the words:\n");
+    for (int i = 0; i < wordCount; i++) {
+        scanf("%s", words[i]);
+    }
+
+    if (solveCrossword(grid, words, 0, n, wordCount)) {
+        printf("Solved crossword puzzle:\n");
+        printGrid(grid, n);
+    } else {
+        printf("No solution exists.\n");
+    }
+
+    return 0;
+}
+
+
+
+
+
+
